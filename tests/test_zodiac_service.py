@@ -97,11 +97,41 @@ class TestZodiacService(unittest.TestCase):
         with self.assertRaises(ValueError):
             get_zodiac_sign(13, 1)  # 月份太大
         
-        # 无效日期
+        # 大月无效日期（1,3,5,7,8,10,12月）
         with self.assertRaises(ValueError):
             get_zodiac_sign(1, 0)   # 日期太小
         with self.assertRaises(ValueError):
             get_zodiac_sign(1, 32)  # 日期太大
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(3, 0)   # 日期太小
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(3, 32)  # 日期太大
+        
+        # 小月无效日期（4,6,9,11月）
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(4, 0)   # 日期太小
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(4, 31)  # 日期太大
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(6, 0)   # 日期太小
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(6, 31)  # 日期太大
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(9, 0)   # 日期太小
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(9, 31)  # 日期太大
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(11, 0)  # 日期太小
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(11, 31)  # 日期太大
+        
+        # 2月无效日期（最多29天）
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(2, 0)   # 日期太小
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(2, 30)  # 日期太大（2月最多29天）
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(2, 31)  # 日期太大
     
     def test_get_zodiac_date_range(self):
         """测试获取星座日期范围"""
@@ -136,6 +166,37 @@ class TestZodiacService(unittest.TestCase):
             with self.subTest(month=month, day=day):
                 self.assertEqual(get_zodiac_sign(month, day), expected_sign,
                                f"{month}月{day}日应该是{expected_sign}")
+    
+    def test_february_dates(self):
+        """测试2月日期处理"""
+        # 2月有效日期
+        self.assertEqual(get_zodiac_sign(2, 1), "水瓶座")   # 2月1日是水瓶座
+        self.assertEqual(get_zodiac_sign(2, 18), "水瓶座")  # 2月18日是水瓶座
+        self.assertEqual(get_zodiac_sign(2, 19), "双鱼座")  # 2月19日是双鱼座
+        self.assertEqual(get_zodiac_sign(2, 29), "双鱼座")  # 2月29日是双鱼座
+        
+        # 2月无效日期已经在test_invalid_dates中测试
+        
+    def test_month_day_limits(self):
+        """测试各月份的日期限制"""
+        # 大月（31天）
+        valid_large_months = [1, 3, 5, 7, 8, 10, 12]
+        for month in valid_large_months:
+            self.assertEqual(get_zodiac_sign(month, 31), "星座查询应该成功")
+        
+        # 小月（30天）
+        valid_small_months = [4, 6, 9, 11]
+        for month in valid_small_months:
+            self.assertEqual(get_zodiac_sign(month, 30), "星座查询应该成功")
+            with self.assertRaises(ValueError):
+                get_zodiac_sign(month, 31)  # 小月没有31日
+        
+        # 2月（29天）
+        self.assertEqual(get_zodiac_sign(2, 29), "星座查询应该成功")
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(2, 30)  # 2月没有30日
+        with self.assertRaises(ValueError):
+            get_zodiac_sign(2, 31)  # 2月没有31日
 
 
 if __name__ == '__main__':

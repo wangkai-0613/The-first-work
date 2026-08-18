@@ -31,11 +31,20 @@ ZODIAC_BOUNDARIES = [
 
 def get_zodiac_sign(month: int, day: int) -> str:
     """根据月和日返回中文星座名称。"""
-    # 参数校验
+    # 参数校验 - 考虑每个月的实际天数
     if not (1 <= month <= 12):
         raise ValueError(f"月份必须在1-12之间，当前输入：{month}")
-    if not (1 <= day <= 31):
-        raise ValueError(f"日期必须在1-31之间，当前输入：{day}")
+    
+    # 根据月份进行严格的日期校验
+    if month == 2:  # 2月最多29天
+        if not (1 <= day <= 29):
+            raise ValueError(f"2月日期必须在1-29之间，当前输入：{day}")
+    elif month in [4, 6, 9, 11]:  # 小月（4,6,9,11月）最多30天
+        if not (1 <= day <= 30):
+            raise ValueError(f"{month}月日期必须在1-30之间，当前输入：{day}")
+    else:  # 大月（1,3,5,7,8,10,12月）最多31天
+        if not (1 <= day <= 31):
+            raise ValueError(f"{month}月日期必须在1-31之间，当前输入：{day}")
     
     # 遍历星座边界，判断属于哪个星座
     for zodiac in ZODIAC_BOUNDARIES:
