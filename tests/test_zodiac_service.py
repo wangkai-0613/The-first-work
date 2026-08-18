@@ -1,4 +1,7 @@
-"""星座服务测试模块"""
+"""
+星座查询功能测试
+运行方式: python -m unittest tests.test_zodiac_service -v
+"""
 
 import unittest
 import sys
