@@ -179,20 +179,40 @@ class TestZodiacService(unittest.TestCase):
         
     def test_month_day_limits(self):
         """测试各月份的日期限制"""
-        # 大月（31天）
-        valid_large_months = [1, 3, 5, 7, 8, 10, 12]
-        for month in valid_large_months:
-            self.assertEqual(get_zodiac_sign(month, 31), "星座查询应该成功")
+        # 大月（31天）- 验证能正常查询到正确的星座
+        valid_large_months = {
+            1: "摩羯座",   # 1月31日是摩羯座
+            3: "双鱼座",   # 3月31日是双鱼座
+            5: "双子座",   # 5月31日是双子座
+            7: "巨蟹座",   # 7月31日是巨蟹座
+            8: "处女座",   # 8月31日是处女座
+            10: "天蝎座",  # 10月31日是天蝎座
+            12: "射手座",  # 12月31日是射手座
+        }
         
-        # 小月（30天）
-        valid_small_months = [4, 6, 9, 11]
-        for month in valid_small_months:
-            self.assertEqual(get_zodiac_sign(month, 30), "星座查询应该成功")
+        for month, expected_sign in valid_large_months.items():
+            result = get_zodiac_sign(month, 31)
+            self.assertEqual(result, expected_sign, 
+                           f"{month}月31日应该是{expected_sign}，实际是{result}")
+        
+        # 小月（30天）- 验证能正常查询到正确的星座
+        valid_small_months = {
+            4: "金牛座",   # 4月30日是金牛座
+            6: "巨蟹座",   # 6月30日是巨蟹座
+            9: "天秤座",   # 9月30日是天秤座
+            11: "射手座",  # 11月30日是射手座
+        }
+        
+        for month, expected_sign in valid_small_months.items():
+            result = get_zodiac_sign(month, 30)
+            self.assertEqual(result, expected_sign, 
+                           f"{month}月30日应该是{expected_sign}，实际是{result}")
             with self.assertRaises(ValueError):
                 get_zodiac_sign(month, 31)  # 小月没有31日
         
         # 2月（29天）
-        self.assertEqual(get_zodiac_sign(2, 29), "星座查询应该成功")
+        self.assertEqual(get_zodiac_sign(2, 29), "双鱼座", 
+                        "2月29日应该是双鱼座")
         with self.assertRaises(ValueError):
             get_zodiac_sign(2, 30)  # 2月没有30日
         with self.assertRaises(ValueError):
