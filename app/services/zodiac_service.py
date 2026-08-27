@@ -30,7 +30,19 @@ ZODIAC_BOUNDARIES = [
 
 
 def get_zodiac_sign(month: int, day: int) -> str:
-    """根据月和日返回中文星座名称。"""
+    """根据出生月、日返回对应的中文十二星座名称。
+
+    Args:
+        month: 月份（1～12）。
+        day: 日期，必须在 ``month`` 对应的实际天数范围内（闰年 2 月 29
+            日也算作合法输入，交由调用方决定是否结合具体年份使用）。
+
+    Returns:
+        中文星座名称，例如 ``"狮子座"``。
+
+    Raises:
+        ValueError: ``month`` 不在 1～12，或 ``day`` 超出该月的天数范围。
+    """
     # 参数校验 - 考虑每个月的实际天数
     if not (1 <= month <= 12):
         raise ValueError(f"月份必须在1-12之间，当前输入：{month}")
@@ -63,15 +75,27 @@ def get_zodiac_sign(month: int, day: int) -> str:
 
 
 def get_all_zodiac_signs() -> list:
-    """获取所有星座名称列表。"""
+    """按日期先后顺序返回全部十二个中文星座名称。"""
     return [zodiac["name"] for zodiac in ZODIAC_BOUNDARIES]
 
 
 def get_zodiac_date_range(zodiac_name: str) -> tuple:
-    """获取星座的日期范围。返回：(开始月份, 开始日期, 结束月份, 结束日期)"""
+    """查询某个星座对应的日期范围。
+
+    Args:
+        zodiac_name: 中文星座名称，须是 :func:`get_all_zodiac_signs` 返回
+            的十二个名称之一。
+
+    Returns:
+        ``(开始月份, 开始日期, 结束月份, 结束日期)`` 四元组；摩羯座跨年，
+        开始月份会大于结束月份。
+
+    Raises:
+        ValueError: ``zodiac_name`` 不是合法的中文星座名称。
+    """
     for zodiac in ZODIAC_BOUNDARIES:
         if zodiac["name"] == zodiac_name:
-            return (zodiac["start_month"], zodiac["start_day"], 
+            return (zodiac["start_month"], zodiac["start_day"],
                    zodiac["end_month"], zodiac["end_day"])
     raise ValueError(f"未找到星座：{zodiac_name}")
 

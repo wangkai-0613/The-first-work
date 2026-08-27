@@ -11,6 +11,12 @@ class BirthdayAssistantApp(tk.Tk):
     """提供输入、查询、结果展示和导出的完整交互流程。"""
 
     def __init__(self, controller: BirthdayController | None = None) -> None:
+        """构建主窗口并接入业务逻辑。
+
+        Args:
+            controller: 用于查询和导出的控制器；默认创建接入真实服务的
+                :class:`BirthdayController`，测试时可替换为假实现。
+        """
         super().__init__()
         self.controller = controller or BirthdayController()
         self.current_result: QueryResult | None = None
@@ -24,6 +30,7 @@ class BirthdayAssistantApp(tk.Tk):
         self._build_ui()
 
     def _build_ui(self) -> None:
+        """搭建输入区、结果展示区和底部导出按钮；只负责布局，不含业务逻辑。"""
         container = ttk.Frame(self, padding=24)
         container.pack(fill="both", expand=True)
         ttk.Label(container, text="生日助手", style="Title.TLabel").pack()
@@ -69,6 +76,7 @@ class BirthdayAssistantApp(tk.Tk):
         self.birth_date_entry.focus_set()
 
     def _on_query(self, _event: tk.Event | None = None) -> None:
+        """“查询”按钮/回车键回调：读取输入、调用控制器，并把结果或错误反馈给用户。"""
         text = self.birth_date_entry.get()
         if not text.strip():
             messagebox.showwarning("输入提示", "请输入出生日期。", parent=self)
@@ -89,6 +97,7 @@ class BirthdayAssistantApp(tk.Tk):
             self.query_button.configure(state="normal")
 
     def _show_result(self, result: QueryResult) -> None:
+        """把一次 :class:`QueryResult` 渲染到结果展示区的各个字段。"""
         fortune = result.fortune
         countdown = ("今天就是生日，生日快乐！" if result.countdown == 0
                      else f"还有 {result.countdown} 天")
@@ -104,6 +113,7 @@ class BirthdayAssistantApp(tk.Tk):
         self.result_vars["message"].set(str(fortune["message"]))
 
     def _on_export(self) -> None:
+        """“导出结果”按钮回调：弹出保存对话框，再委托控制器写文件。"""
         if self.current_result is None:
             messagebox.showwarning("导出提示", "请先完成一次查询。", parent=self)
             return
