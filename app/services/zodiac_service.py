@@ -5,6 +5,7 @@
 避免重复维护结束边界；查询使用二分查找，时间复杂度为 O(log n)。
 """
 
+
 from bisect import bisect_right
 from datetime import date, timedelta
 from typing import Final
@@ -113,6 +114,7 @@ def get_zodiac_date_range(zodiac_name: str) -> tuple[int, int, int, int]:
 
     Returns:
         四元组 (开始月份, 开始日期, 结束月份, 结束日期)。
+
 
     Raises:
         ValueError: 星座名称不存在。

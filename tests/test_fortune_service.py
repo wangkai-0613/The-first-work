@@ -1,8 +1,11 @@
 """每日稳定运势服务测试。"""
 
 from datetime import date
+from pathlib import Path
+import tempfile
 import unittest
 
+from app.services import fortune_service
 from app.services.fortune_service import get_daily_fortune
 
 
@@ -39,6 +42,54 @@ class FortuneServiceTests(unittest.TestCase):
             get_daily_fortune("狮子")
         with self.assertRaisesRegex(ValueError, "日期对象"):
             get_daily_fortune("狮子座", "2026-08-18")  # type: ignore[arg-type]
+
+
+class LoadMaterialsTests(unittest.TestCase):
+    """针对离线素材文件本身损坏/缺失场景的边界测试。"""
+
+    def setUp(self) -> None:
+        self._original_data_file = fortune_service.DATA_FILE
+        fortune_service._load_materials.cache_clear()
+
+    def tearDown(self) -> None:
+        fortune_service.DATA_FILE = self._original_data_file
+        fortune_service._load_materials.cache_clear()
+
+    def test_missing_file_raises_value_error(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fortune_service.DATA_FILE = Path(directory) / "missing.json"
+            with self.assertRaisesRegex(ValueError, "运势素材读取失败"):
+                fortune_service._load_materials()
+
+    def test_invalid_json_raises_value_error(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            data_file = Path(directory) / "broken.json"
+            data_file.write_text("{not valid json", encoding="utf-8")
+            fortune_service.DATA_FILE = data_file
+            with self.assertRaisesRegex(ValueError, "运势素材读取失败"):
+                fortune_service._load_materials()
+
+    def test_missing_required_key_raises_value_error(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            data_file = Path(directory) / "incomplete.json"
+            data_file.write_text(
+                '{"fortunes": {"messages": ["m"], "colors": ["红色"]}}',
+                encoding="utf-8",
+            )
+            fortune_service.DATA_FILE = data_file
+            with self.assertRaisesRegex(ValueError, "格式不正确"):
+                fortune_service._load_materials()
+
+    def test_empty_list_value_raises_value_error(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            data_file = Path(directory) / "empty_list.json"
+            data_file.write_text(
+                '{"fortunes": {"messages": [], "colors": ["红色"], "numbers": [1]}}',
+                encoding="utf-8",
+            )
+            fortune_service.DATA_FILE = data_file
+            with self.assertRaisesRegex(ValueError, "格式不正确"):
+                fortune_service._load_materials()
 
 
 if __name__ == "__main__":
